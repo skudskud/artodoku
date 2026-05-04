@@ -348,13 +348,7 @@ function updateAutocomplete(query, dropdown, row, col) {
     item.className = 'autocomplete-item';
     if (i === highlightedIndex) item.classList.add('highlighted');
 
-    const dates = artist.died ? `${artist.born}–${artist.died}` : `${artist.born}–…`;
-    const nat = NATIONALITY_LABELS[artist.nationality] || artist.nationality;
-
-    item.innerHTML = `
-      <span>${artist.name}</span>
-      <span class="hint">${nat} · ${dates}</span>
-    `;
+    item.innerHTML = `<span>${artist.name}</span>`;
 
     item.addEventListener('mouseenter', () => {
       highlightedIndex = i;
@@ -464,18 +458,28 @@ function endGame(won) {
 }
 
 function revealSolutions() {
+  if (activeCell) deactivateCell();
   const revealedArtists = new Set(usedArtists);
 
   currentGrid.rows.forEach((row, ri) => {
     currentGrid.cols.forEach((col, ci) => {
       const key = `${ri}-${ci}`;
       if (!answers[key]) {
-        const solutions = getSolutions(row, col).filter(a => !revealedArtists.has(a.key));
         const cell = document.querySelector(`.cell[data-row="${ri}"][data-col="${ci}"]`);
-        if (cell && solutions.length > 0) {
+        if (!cell) return;
+        const solutions = getSolutions(row, col).filter(a => !revealedArtists.has(a.key));
+        if (solutions.length > 0) {
           revealedArtists.add(solutions[0].key);
           cell.classList.add('game-over');
           renderSolvedCell(cell, solutions[0], true);
+        } else {
+          const allSolutions = getSolutions(row, col);
+          cell.classList.add('game-over');
+          if (allSolutions.length > 0) {
+            renderSolvedCell(cell, allSolutions[0], true);
+          } else {
+            cell.innerHTML = '<div class="artist-name" style="color:var(--text-light);">—</div>';
+          }
         }
       }
     });
