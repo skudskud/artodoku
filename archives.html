@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>artodoku – Archives</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+  <style>
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.55;
+      margin-bottom: 32px;
+    }
+    .archive-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .archive-card {
+      background: white;
+      border: 1.5px solid var(--cell-border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .archive-card:hover {
+      border-color: #aab2be;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .archive-card-info h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .archive-card-info .difficulty {
+      font-size: 13px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+    .difficulty .diff-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 2px;
+      vertical-align: middle;
+      background: var(--cell-border);
+    }
+    .difficulty .diff-dot.active { background: var(--text); }
+    .archive-play-btn {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      background: var(--text);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .archive-play-btn:hover { opacity: 0.85; }
+
+    @media (max-width: 600px) {
+      .archive-card { padding: 14px 16px; }
+      .archive-card-info h3 { font-size: 14px; }
+      .archive-play-btn { font-size: 12px; padding: 7px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <a href="index.html" class="logo">artodoku</a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">JEU</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+        <a href="archives.html" class="nav-link">ARCHIVES</a>
+      </nav>
+    </header>
+    <hr class="divider">
+    <main class="main">
+      <h1 class="page-title">Archives</h1>
+      <p class="page-subtitle">Rejouez les anciennes grilles publiées d'artodoku. Les archives sont des puzzles bonus et n'affectent ni les statistiques, ni les scores quotidiens.</p>
+
+      <div class="archive-list" id="archive-list"></div>
+    </main>
+    <footer class="site-footer">
+      © 2026, artodoku
+    </footer>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    function formatDisplayDate(dateStr) {
+      const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+      const [y, m, d] = dateStr.split('-');
+      return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+    }
+
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function renderArchives() {
+      const list = document.getElementById('archive-list');
+      const today = todayStr();
+      const pastGrids = GRIDS.filter(g => g.date !== today).sort((a, b) => b.date.localeCompare(a.date));
+
+      pastGrids.forEach(grid => {
+        const card = document.createElement('div');
+        card.className = 'archive-card';
+
+        let dots = '';
+        for (let i = 1; i <= 5; i++) {
+          dots += `<span class="diff-dot${i <= grid.difficulty ? ' active' : ''}"></span>`;
+        }
+
+        card.innerHTML = `
+          <div class="archive-card-info">
+            <h3>${formatDisplayDate(grid.date)}</h3>
+            <div class="difficulty">${dots} ${grid.difficulty}/5 · ${grid.difficultyLabel}</div>
+          </div>
+          <a href="index.html?date=${grid.date}" class="archive-play-btn">Jouer cette grille</a>
+        `;
+        list.appendChild(card);
+      });
+
+      if (pastGrids.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-light);font-size:14px;">Aucune archive disponible pour le moment.</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', renderArchives);
+  </script>
+</body>
+</html>

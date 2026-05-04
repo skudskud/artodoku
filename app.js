@@ -1,0 +1,401 @@
+// ── State ──
+let currentGrid = null;
+let answers = {};
+let errors = 0;
+let score = 0;
+let activeCell = null;
+let gameOver = false;
+let usedArtists = new Set();
+let highlightedIndex = -1;
+
+// ── Utils ──
+function normalize(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function matchCategory(cat, artist) {
+  const key = normalize(artist.key);
+  switch (cat.type) {
+    case "containsLetter":
+      return key.includes(cat.letter.toLowerCase());
+    case "firstLetter":
+      return key.startsWith(cat.letter.toLowerCase());
+    case "lastLetter":
+      return key.endsWith(cat.letter.toLowerCase());
+    case "movement":
+      return artist.movements.includes(cat.id);
+    case "nationality":
+      return artist.nationality === cat.id;
+    case "medium":
+      return artist.media.includes(cat.id);
+    case "city":
+      return artist.cities.includes(cat.id);
+    case "century": {
+      const start = (cat.century - 1) * 100;
+      const end = cat.century * 100;
+      return artist.born < end && (artist.died || 2026) > start;
+    }
+    case "alive":
+      return artist.died === null;
+    case "doubleLetter": {
+      for (let i = 0; i < key.length - 1; i++) {
+        if (key[i] === key[i + 1] && /[a-z]/.test(key[i])) return true;
+      }
+      return false;
+    }
+    default:
+      return false;
+  }
+}
+
+function getSolutions(rowCat, colCat) {
+  return ARTISTS.filter(a => matchCategory(rowCat, a) && matchCategory(colCat, a));
+}
+
+function formatDisplayDate(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// ── Init ──
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedDate = params.get('date');
+  const today = todayStr();
+
+  if (requestedDate && requestedDate !== today) {
+    currentGrid = GRIDS.find(g => g.date === requestedDate);
+    if (!currentGrid) {
+      document.querySelector('.main').innerHTML = `
+        <div class="end-banner" style="margin-top:40px">
+          <h3>Grille introuvable</h3>
+          <p>Aucune grille disponible pour le ${formatDisplayDate(requestedDate)}.</p>
+          <p style="margin-top:12px"><a href="archives.html" style="color:var(--text);font-weight:600">← Retour aux archives</a></p>
+        </div>`;
+      return;
+    }
+    document.querySelector('.grid-title').textContent = 'archive';
+    const badge = document.createElement('span');
+    badge.className = 'archive-badge';
+    badge.textContent = `${currentGrid.difficulty}/5 · ${currentGrid.difficultyLabel}`;
+    document.querySelector('.grid-title').appendChild(badge);
+  } else {
+    currentGrid = GRIDS.find(g => g.date === today) || GRIDS[0];
+  }
+
+  document.getElementById('grid-date').textContent = formatDisplayDate(currentGrid.date);
+  renderGrid();
+  renderErrors();
+  updateScore();
+
+  document.getElementById('abandon-btn').addEventListener('click', onAbandon);
+
+  document.addEventListener('click', (e) => {
+    if (activeCell && !activeCell.element.contains(e.target)) {
+      deactivateCell();
+    }
+  });
+}
+
+// ── Render grid ──
+function renderGrid() {
+  const grid = document.getElementById('game-grid');
+  grid.innerHTML = '';
+
+  grid.appendChild(el('div', 'corner'));
+
+  currentGrid.cols.forEach(col => {
+    const header = el('div', 'col-header');
+    header.innerHTML = `<span class="header-label">${col.label}</span>`;
+    grid.appendChild(header);
+  });
+
+  currentGrid.rows.forEach((row, ri) => {
+    const rh = el('div', 'row-header');
+    rh.innerHTML = `<span class="header-label">${row.label}</span>`;
+    grid.appendChild(rh);
+
+    currentGrid.cols.forEach((col, ci) => {
+      const cell = el('div', 'cell');
+      cell.dataset.row = ri;
+      cell.dataset.col = ci;
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onCellClick(ri, ci, cell);
+      });
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function el(tag, cls) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+
+// ── Cell interaction ──
+function onCellClick(row, col, cell) {
+  if (gameOver) return;
+  if (answers[`${row}-${col}`]) return;
+  if (activeCell) deactivateCell();
+  activateCell(row, col, cell);
+}
+
+function activateCell(row, col, cell) {
+  activeCell = { row, col, element: cell };
+  cell.classList.add('active');
+  highlightedIndex = -1;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'autocomplete-input';
+  input.placeholder = 'Artiste…';
+  input.autocomplete = 'off';
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'autocomplete-dropdown';
+  dropdown.style.display = 'none';
+
+  cell.innerHTML = '';
+  cell.appendChild(input);
+  cell.appendChild(dropdown);
+
+  input.focus();
+
+  input.addEventListener('input', () => {
+    highlightedIndex = -1;
+    updateAutocomplete(input.value, dropdown, row, col);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    const items = dropdown.querySelectorAll('.autocomplete-item');
+
+    if (e.key === 'Escape') {
+      deactivateCell();
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+      updateHighlight(items);
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      highlightedIndex = Math.max(highlightedIndex - 1, 0);
+      updateHighlight(items);
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && items[highlightedIndex]) {
+        items[highlightedIndex].click();
+      } else if (items.length > 0) {
+        items[0].click();
+      }
+    }
+  });
+}
+
+function updateHighlight(items) {
+  items.forEach((it, i) => {
+    it.classList.toggle('highlighted', i === highlightedIndex);
+  });
+  if (items[highlightedIndex]) {
+    items[highlightedIndex].scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function deactivateCell() {
+  if (!activeCell) return;
+  const { row, col, element } = activeCell;
+  if (!answers[`${row}-${col}`]) {
+    element.innerHTML = '';
+    element.classList.remove('active');
+  }
+  activeCell = null;
+  highlightedIndex = -1;
+}
+
+function updateAutocomplete(query, dropdown, row, col) {
+  if (!query || query.length < 5) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  const norm = normalize(query);
+  const results = ARTISTS.filter(a => {
+    if (usedArtists.has(a.key)) return false;
+    return normalize(a.name).includes(norm) || normalize(a.key).includes(norm);
+  }).slice(0, 7);
+
+  if (results.length === 0) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  dropdown.innerHTML = '';
+  dropdown.style.display = 'block';
+
+  results.forEach((artist, i) => {
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item';
+    if (i === highlightedIndex) item.classList.add('highlighted');
+
+    const dates = artist.died ? `${artist.born}–${artist.died}` : `${artist.born}–…`;
+    const nat = NATIONALITY_LABELS[artist.nationality] || artist.nationality;
+
+    item.innerHTML = `
+      <span>${artist.name}</span>
+      <span class="hint">${nat} · ${dates}</span>
+    `;
+
+    item.addEventListener('mouseenter', () => {
+      highlightedIndex = i;
+      updateHighlight(dropdown.querySelectorAll('.autocomplete-item'));
+    });
+
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectArtist(artist, row, col);
+    });
+
+    dropdown.appendChild(item);
+  });
+}
+
+// ── Selection & Validation ──
+function selectArtist(artist, row, col) {
+  const rowCat = currentGrid.rows[row];
+  const colCat = currentGrid.cols[col];
+  const key = `${row}-${col}`;
+
+  const matchesRow = matchCategory(rowCat, artist);
+  const matchesCol = matchCategory(colCat, artist);
+
+  if (matchesRow && matchesCol) {
+    answers[key] = artist;
+    usedArtists.add(artist.key);
+    score += 100;
+
+    const cell = activeCell.element;
+    cell.classList.remove('active');
+    cell.classList.add('solved');
+    cell.innerHTML = `
+      <div>
+        <div class="artist-name">${artist.key}</div>
+      </div>
+    `;
+    activeCell = null;
+    highlightedIndex = -1;
+    updateScore();
+
+    if (Object.keys(answers).length === 9) {
+      endGame(true);
+    }
+  } else {
+    errors++;
+    renderErrors();
+    score = Math.max(0, score - 20);
+    updateScore();
+
+    const cell = activeCell.element;
+    cell.classList.add('error-flash');
+    setTimeout(() => cell.classList.remove('error-flash'), 400);
+
+    if (errors >= 3) {
+      deactivateCell();
+      endGame(false);
+    }
+  }
+}
+
+// ── Score & Errors ──
+function updateScore() {
+  document.getElementById('score-value').textContent = score;
+}
+
+function renderErrors() {
+  const dots = document.getElementById('error-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const dot = el('span', 'error-dot' + (i < errors ? ' filled' : ''));
+    dots.appendChild(dot);
+  }
+}
+
+// ── End game ──
+function endGame(won) {
+  gameOver = true;
+  document.getElementById('abandon-btn').disabled = true;
+
+  if (!won) {
+    revealSolutions();
+  }
+
+  const banner = el('div', 'end-banner');
+  if (won) {
+    banner.innerHTML = `
+      <h3>Bravo !</h3>
+      <p>Grille complétée — Score final : <strong>${score}/900</strong></p>
+    `;
+  } else {
+    banner.innerHTML = `
+      <h3>Fin de partie</h3>
+      <p>Score final : <strong>${score}/900</strong> — Les solutions ont été révélées.</p>
+    `;
+  }
+  document.querySelector('.main').appendChild(banner);
+}
+
+function revealSolutions() {
+  const revealedArtists = new Set(usedArtists);
+
+  currentGrid.rows.forEach((row, ri) => {
+    currentGrid.cols.forEach((col, ci) => {
+      const key = `${ri}-${ci}`;
+      if (!answers[key]) {
+        const solutions = getSolutions(row, col).filter(a => !revealedArtists.has(a.key));
+        const cell = document.querySelector(`.cell[data-row="${ri}"][data-col="${ci}"]`);
+        if (cell && solutions.length > 0) {
+          revealedArtists.add(solutions[0].key);
+          cell.classList.add('game-over');
+          cell.innerHTML = `
+            <div>
+              <div class="artist-name" style="color: var(--text-light);">${solutions[0].key}</div>
+            </div>
+          `;
+        }
+      }
+    });
+  });
+}
+
+function onAbandon() {
+  if (gameOver) return;
+  revealSolutions();
+  gameOver = true;
+  document.getElementById('abandon-btn').disabled = true;
+
+  const banner = el('div', 'end-banner');
+  banner.innerHTML = `
+    <h3>Solutions révélées</h3>
+    <p>Score final : <strong>${score}/900</strong></p>
+  `;
+  document.querySelector('.main').appendChild(banner);
+}
+
+// ── Boot ──
+document.addEventListener('DOMContentLoaded', init);

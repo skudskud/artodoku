@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>artodoku – grille d'art quotidienne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <a href="/" class="logo">artodoku</a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">JEU</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+        <a href="archives.html" class="nav-link">ARCHIVES</a>
+      </nav>
+    </header>
+    <hr class="divider">
+    <main class="main">
+      <div class="grid-info">
+        <div>
+          <h2 class="grid-title">grille du jour</h2>
+          <p class="grid-date" id="grid-date"></p>
+        </div>
+        <p class="score-display">Score : <strong id="score-value">0</strong>/900</p>
+      </div>
+      <div class="game-grid" id="game-grid"></div>
+      <div class="grid-footer">
+        <button class="abandon-btn" id="abandon-btn">Abandonner et voir les solutions</button>
+        <div class="error-display">
+          <span>Erreurs</span>
+          <span class="error-dots" id="error-dots"></span>
+        </div>
+      </div>
+    </main>
+    <footer class="site-footer">
+      © 2026, artodoku
+    </footer>
+  </div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

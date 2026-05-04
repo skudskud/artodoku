@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>artodoku – FAQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+  <style>
+    .faq-section { margin-bottom: 36px; }
+    .faq-section h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+    .faq-item { margin-bottom: 24px; }
+    .faq-item h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+    .faq-item p {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .faq-item p + p { margin-top: 8px; }
+    .faq-example {
+      background: white;
+      border: 1.5px solid var(--cell-border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-top: 12px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--text-light);
+    }
+    .faq-example strong { color: var(--text); }
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 28px;
+    }
+    .contact-link {
+      color: var(--text);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <a href="index.html" class="logo">artodoku</a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">JEU</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+        <a href="archives.html" class="nav-link">ARCHIVES</a>
+      </nav>
+    </header>
+    <hr class="divider">
+    <main class="main">
+      <h1 class="page-title">FAQ</h1>
+
+      <div class="faq-section">
+        <h2>Catégories</h2>
+
+        <div class="faq-item">
+          <h3>Pourquoi un artiste correct n'est-il pas accepté ?</h3>
+          <p>Le jeu repose sur une base de données structurée d'artistes et de leurs attributs (mouvement, nationalité, villes, médiums…). Il peut donc exister des cas limites ou des interprétations différentes. Un artiste peut être associé à plusieurs mouvements dans la réalité mais n'en avoir qu'un ou deux dans notre base.</p>
+          <div class="faq-example">
+            <strong>Un cas typique :</strong> Picasso est souvent associé au surréalisme en plus du cubisme. Dans artodoku, il est classé en cubisme uniquement. Si la catégorie est « Surréalisme », Picasso ne sera pas accepté.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <h3>Comment sont définies les catégories ?</h3>
+          <p>Les catégories peuvent porter sur : le mouvement artistique, la nationalité, le siècle d'activité, la première ou dernière lettre du nom, la présence d'une lettre dans le nom, le médium (peinture, sculpture…), ou les villes où l'artiste a travaillé.</p>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2>Règles du jeu</h2>
+
+        <div class="faq-item">
+          <h3>Comment jouer ?</h3>
+          <p>Cliquez sur une case vide et tapez le nom d'un artiste. Les suggestions apparaissent après 5 lettres. Sélectionnez un artiste : s'il correspond aux deux catégories (ligne + colonne), la case est validée. Sinon, vous perdez une tentative.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Combien d'erreurs sont autorisées ?</h3>
+          <p>Vous avez droit à 3 erreurs. À la troisième, la partie se termine et les solutions sont révélées.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Un artiste peut-il être utilisé plusieurs fois ?</h3>
+          <p>Non. Chaque artiste ne peut être placé que dans une seule case par grille, même s'il correspond à plusieurs intersections.</p>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2>Score</h2>
+
+        <div class="faq-item">
+          <h3>Comment est calculé le score ?</h3>
+          <p>Chaque bonne réponse rapporte 100 points. Chaque erreur retire 20 points. Le score maximum est de 900 points (9 cases × 100 points).</p>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2>Données et base d'artistes</h2>
+
+        <div class="faq-item">
+          <h3>Combien d'artistes sont dans la base ?</h3>
+          <p>La base contient environ 75 artistes, de la Renaissance à l'art contemporain. Elle inclut des peintres, sculpteurs, et photographes de nationalités variées.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Le jeu peut-il contenir des erreurs ?</h3>
+          <p>Oui. Malgré les vérifications, certaines classifications (mouvement, villes…) peuvent être inexactes ou discutables. L'histoire de l'art est riche en nuances et en débats.</p>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2>Divers</h2>
+
+        <div class="faq-item">
+          <h3>Y a-t-il une nouvelle grille tous les jours ?</h3>
+          <p>Oui. Une nouvelle grille quotidienne est proposée chaque jour.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Puis-je rejouer les anciennes grilles ?</h3>
+          <p>Oui, rendez-vous sur la page <a href="archives.html" class="contact-link">Archives</a> pour retrouver les grilles passées.</p>
+        </div>
+      </div>
+
+    </main>
+    <footer class="site-footer">
+      © 2026, artodoku
+    </footer>
+  </div>
+</body>
+</html>
