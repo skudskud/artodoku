@@ -221,7 +221,7 @@ function deactivateCell() {
 }
 
 function updateAutocomplete(query, dropdown, row, col) {
-  if (!query || query.length < 5) {
+  if (!query || query.length < 3) {
     dropdown.style.display = 'none';
     return;
   }
