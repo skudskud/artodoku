@@ -7,6 +7,8 @@ let activeCell = null;
 let gameOver = false;
 let usedArtists = new Set();
 let highlightedIndex = -1;
+let isFemmesMode = false;
+let artistPool = ARTISTS;
 
 // ── Utils ──
 function normalize(str) {
@@ -53,7 +55,7 @@ function matchCategory(cat, artist) {
 }
 
 function getSolutions(rowCat, colCat) {
-  return ARTISTS.filter(a => matchCategory(rowCat, a) && matchCategory(colCat, a));
+  return artistPool.filter(a => matchCategory(rowCat, a) && matchCategory(colCat, a));
 }
 
 function formatDisplayDate(dateStr) {
@@ -103,7 +105,8 @@ function getArtistSummary(artist) {
 // ── How-to-play modal ──
 function showHowToPlay() {
   const modal = document.getElementById('how-to-play-modal');
-  if (localStorage.getItem('artodoku-hide-howto') === '1') {
+  const storageKey = isFemmesMode ? 'artodoku-hide-howto-femmes' : 'artodoku-hide-howto';
+  if (localStorage.getItem(storageKey) === '1') {
     modal.classList.add('hidden');
     return;
   }
@@ -111,7 +114,7 @@ function showHowToPlay() {
 
   const closeModal = () => {
     if (document.getElementById('modal-dismiss-checkbox').checked) {
-      localStorage.setItem('artodoku-hide-howto', '1');
+      localStorage.setItem(storageKey, '1');
     }
     modal.classList.add('hidden');
   };
@@ -138,15 +141,30 @@ function init() {
   const requestedDate = params.get('date');
   const today = todayStr();
 
+  isFemmesMode = params.get('mode') === 'femmes' ||
+    window.location.pathname.includes('femmes');
+  if (isFemmesMode) {
+    artistPool = WOMEN_ARTISTS_LIST;
+  }
+
+  const gen = isFemmesMode ? generateGridFemmes : generateGrid;
+
   if (requestedDate && requestedDate !== today) {
-    currentGrid = generateGrid(requestedDate);
+    currentGrid = gen(requestedDate);
     document.querySelector('.grid-title').textContent = 'archive';
     const badge = document.createElement('span');
     badge.className = 'archive-badge';
     badge.textContent = `${currentGrid.difficulty}/5 · ${currentGrid.difficultyLabel}`;
     document.querySelector('.grid-title').appendChild(badge);
   } else {
-    currentGrid = generateGrid(today);
+    currentGrid = gen(today);
+  }
+
+  if (isFemmesMode) {
+    const titleEl = document.querySelector('.grid-title');
+    if (!titleEl.textContent.startsWith('archive')) {
+      titleEl.textContent = 'grille du jour — artistes femmes';
+    }
   }
 
   document.getElementById('grid-date').textContent = formatDisplayDate(currentGrid.date);
@@ -312,7 +330,7 @@ function updateAutocomplete(query, dropdown, row, col) {
   }
 
   const norm = normalize(query);
-  const results = ARTISTS.filter(a => {
+  const results = artistPool.filter(a => {
     if (usedArtists.has(a.key)) return false;
     return normalize(a.name).includes(norm) || normalize(a.key).includes(norm);
   }).slice(0, 7);

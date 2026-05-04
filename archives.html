@@ -76,10 +76,35 @@
     }
     .archive-play-btn:hover { opacity: 0.85; }
 
+    .archive-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .archive-tab {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border: 2px solid var(--cell-border);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.15s;
+    }
+    .archive-tab:hover { border-color: #aab2be; }
+    .archive-tab.active {
+      background: var(--text);
+      color: white;
+      border-color: var(--text);
+    }
+
     @media (max-width: 600px) {
       .archive-card { padding: 14px 16px; }
       .archive-card-info h3 { font-size: 14px; }
       .archive-play-btn { font-size: 12px; padding: 7px 14px; }
+      .archive-tab { font-size: 12px; padding: 7px 14px; }
     }
   </style>
 </head>
@@ -89,6 +114,7 @@
       <a href="index.html" class="logo">artodoku</a>
       <nav class="nav">
         <a href="index.html" class="nav-link">JEU</a>
+        <a href="femmes.html" class="nav-link">FEMMES</a>
         <a href="faq.html" class="nav-link">FAQ</a>
         <a href="archives.html" class="nav-link">ARCHIVES</a>
       </nav>
@@ -97,6 +123,11 @@
     <main class="main">
       <h1 class="page-title">Archives</h1>
       <p class="page-subtitle">Rejouez les anciennes grilles publiées d'artodoku. Les archives sont des puzzles bonus et n'affectent ni les statistiques, ni les scores quotidiens.</p>
+
+      <div class="archive-tabs" id="archive-tabs">
+        <button class="archive-tab active" data-tab="classique">Classique</button>
+        <button class="archive-tab" data-tab="femmes">Artistes Femmes</button>
+      </div>
 
       <div class="archive-list" id="archive-list"></div>
     </main>
@@ -108,6 +139,7 @@
   <script src="data.js"></script>
   <script>
     const ARCHIVE_DAYS = 30;
+    let currentTab = 'classique';
 
     function formatDisplayDate(dateStr) {
       const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -115,21 +147,24 @@
       return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
     }
 
-    function dateStr(date) {
+    function dStr(date) {
       return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
     }
 
     function renderArchives() {
       const list = document.getElementById('archive-list');
+      list.innerHTML = '';
       const now = new Date();
-      const todayS = dateStr(now);
+      const isFemmes = currentTab === 'femmes';
+      const gen = isFemmes ? generateGridFemmes : generateGrid;
+      const page = isFemmes ? 'femmes.html' : 'index.html';
+      const modeParam = isFemmes ? '&mode=femmes' : '';
 
       for (let i = 1; i <= ARCHIVE_DAYS; i++) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
-        const ds = dateStr(d);
-
-        const grid = generateGrid(ds);
+        const ds = dStr(d);
+        const grid = gen(ds);
 
         const card = document.createElement('div');
         card.className = 'archive-card';
@@ -144,13 +179,24 @@
             <h3>${formatDisplayDate(ds)}</h3>
             <div class="difficulty">${dots} ${grid.difficulty}/5 · ${grid.difficultyLabel}</div>
           </div>
-          <a href="index.html?date=${ds}" class="archive-play-btn">Jouer cette grille</a>
+          <a href="${page}?date=${ds}${modeParam}" class="archive-play-btn">Jouer cette grille</a>
         `;
         list.appendChild(card);
       }
     }
 
-    document.addEventListener('DOMContentLoaded', renderArchives);
+    document.addEventListener('DOMContentLoaded', () => {
+      renderArchives();
+
+      document.querySelectorAll('.archive-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.archive-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentTab = tab.dataset.tab;
+          renderArchives();
+        });
+      });
+    });
   </script>
 </body>
 </html>

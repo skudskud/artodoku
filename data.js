@@ -647,18 +647,21 @@ const WOMEN_ARTISTS = new Set([
   "Hicks","Saar","Ringgold","Walker","Akunyili Crosby","Muholi","Cao Fei","Kher",
 ]);
 
-function _validateGrid(cols, rows) {
+const WOMEN_ARTISTS_LIST = ARTISTS.filter(a => WOMEN_ARTISTS.has(a.key));
+
+function _validateGrid(cols, rows, pool) {
+  const artistPool = pool || ARTISTS;
   let minSolutions = Infinity;
   let cellsWithWomen = 0;
   for (const row of rows) {
     for (const col of cols) {
-      const matches = ARTISTS.filter(a => _matchCat(row, a) && _matchCat(col, a));
+      const matches = artistPool.filter(a => _matchCat(row, a) && _matchCat(col, a));
       if (matches.length === 0) return { valid: false, min: 0 };
       minSolutions = Math.min(minSolutions, matches.length);
       if (matches.some(a => WOMEN_ARTISTS.has(a.key))) cellsWithWomen++;
     }
   }
-  if (cellsWithWomen < 2) return { valid: false, min: 0 };
+  if (!pool && cellsWithWomen < 2) return { valid: false, min: 0 };
   return { valid: true, min: minSolutions };
 }
 
@@ -700,4 +703,42 @@ function generateGrid(dateStr) {
   }
 
   return GRIDS[0];
+}
+
+function generateGridFemmes(dateStr) {
+  const seed = hashDate(dateStr) + 314159;
+  for (let attempt = 0; attempt < 2000; attempt++) {
+    const rng = mulberry32(seed + attempt * 6271);
+
+    const template = _pick(GRID_TEMPLATES, rng);
+
+    const cols = template.cols.map(group => {
+      const pool = CATEGORY_POOL[group];
+      return pool ? _pick(_shuffle(pool, rng), rng) : null;
+    }).filter(Boolean);
+
+    const rows = template.rows.map(group => {
+      const pool = CATEGORY_POOL[group];
+      return pool ? _pick(_shuffle(pool, rng), rng) : null;
+    }).filter(Boolean);
+
+    if (cols.length !== 3 || rows.length !== 3) continue;
+
+    const hasDupe = new Set([...cols, ...rows].map(c => JSON.stringify(c))).size < 6;
+    if (hasDupe) continue;
+
+    const { valid, min } = _validateGrid(cols, rows, WOMEN_ARTISTS_LIST);
+    if (!valid) continue;
+
+    let difficulty, difficultyLabel;
+    if (min >= 5) { difficulty = 1; difficultyLabel = "Très facile"; }
+    else if (min >= 3) { difficulty = 2; difficultyLabel = "Facile"; }
+    else if (min >= 2) { difficulty = 3; difficultyLabel = "Moyen"; }
+    else if (min >= 1) { difficulty = 4; difficultyLabel = "Difficile"; }
+    else { difficulty = 5; difficultyLabel = "Très difficile"; }
+
+    return { date: dateStr, difficulty, difficultyLabel, cols, rows, generated: true, femmes: true };
+  }
+
+  return generateGrid(dateStr);
 }
