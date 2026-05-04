@@ -285,6 +285,38 @@ const ARTISTS = [
   { name: "Cecily Brown", key: "Brown", born: 1969, died: null, nationality: "british", movements: ["contemporary"], media: ["painting"], cities: ["newyork"] },
   { name: "Julie Mehretu", key: "Mehretu", born: 1970, died: null, nationality: "american", movements: ["contemporary"], media: ["painting"], cities: ["newyork"] },
   { name: "Ana Mendieta", key: "Mendieta", born: 1948, died: 1985, nationality: "cuban", movements: ["contemporary"], media: ["installation", "sculpture"], cities: ["newyork"] },
+
+  // ── More women artists ──
+  { name: "Élisabeth-Sophie Chéron", key: "Chéron", born: 1648, died: 1711, nationality: "french", movements: ["baroque"], media: ["painting"], cities: ["paris"] },
+  { name: "Clara Peeters", key: "Peeters", born: 1594, died: 1657, nationality: "flemish", movements: ["baroque"], media: ["painting"], cities: ["antwerp"] },
+  { name: "Rachel Ruysch", key: "Ruysch", born: 1664, died: 1750, nationality: "dutch", movements: ["baroque"], media: ["painting"], cities: ["amsterdam"] },
+  { name: "Élaine de Kooning", key: "Élaine de Kooning", born: 1918, died: 1989, nationality: "american", movements: ["abstract-expressionism"], media: ["painting"], cities: ["newyork"] },
+  { name: "Alice Neel", key: "Neel", born: 1900, died: 1984, nationality: "american", movements: ["figurative", "expressionism"], media: ["painting"], cities: ["newyork"] },
+  { name: "Grace Hartigan", key: "Hartigan", born: 1922, died: 2008, nationality: "american", movements: ["abstract-expressionism"], media: ["painting"], cities: ["newyork"] },
+  { name: "Alma Thomas", key: "Thomas", born: 1891, died: 1978, nationality: "american", movements: ["abstract"], media: ["painting"], cities: ["newyork"] },
+  { name: "Lois Mailou Jones", key: "Mailou Jones", born: 1905, died: 1998, nationality: "american", movements: ["modernism"], media: ["painting"], cities: ["paris", "newyork"] },
+  { name: "Leonor Fini", key: "Fini", born: 1907, died: 1996, nationality: "italian", movements: ["surrealism"], media: ["painting"], cities: ["paris"] },
+  { name: "Dora Maar", key: "Maar", born: 1907, died: 1997, nationality: "french", movements: ["surrealism"], media: ["photography", "painting"], cities: ["paris"] },
+  { name: "Lee Miller", key: "Miller", born: 1907, died: 1977, nationality: "american", movements: ["surrealism"], media: ["photography"], cities: ["paris", "london"] },
+  { name: "Claude Cahun", key: "Cahun", born: 1894, died: 1954, nationality: "french", movements: ["surrealism"], media: ["photography"], cities: ["paris"] },
+  { name: "Toyen", key: "Toyen", born: 1902, died: 1980, nationality: "czech", movements: ["surrealism"], media: ["painting"], cities: ["paris", "prague"] },
+  { name: "Germaine Richier", key: "Richier", born: 1902, died: 1959, nationality: "french", movements: ["modernism"], media: ["sculpture"], cities: ["paris"] },
+  { name: "Niki de Saint Phalle", key: "Saint Phalle", born: 1930, died: 2002, nationality: "french", movements: ["nouveau-realisme"], media: ["sculpture", "painting"], cities: ["paris", "newyork"] },
+  { name: "Lygia Clark", key: "Clark", born: 1920, died: 1988, nationality: "brazilian", movements: ["contemporary"], media: ["sculpture", "installation"], cities: ["paris"] },
+  { name: "Lygia Pape", key: "Pape", born: 1927, died: 2004, nationality: "brazilian", movements: ["contemporary"], media: ["sculpture", "installation"], cities: [] },
+  { name: "Magdalena Abakanowicz", key: "Abakanowicz", born: 1930, died: 2017, nationality: "polish", movements: ["contemporary"], media: ["sculpture"], cities: [] },
+  { name: "Pipilotti Rist", key: "Rist", born: 1962, died: null, nationality: "swiss", movements: ["contemporary"], media: ["installation"], cities: ["zurich"] },
+  { name: "Annette Messager", key: "Messager", born: 1943, died: null, nationality: "french", movements: ["contemporary"], media: ["installation", "sculpture"], cities: ["paris"] },
+  { name: "Sophie Calle", key: "Calle", born: 1953, died: null, nationality: "french", movements: ["conceptual"], media: ["photography", "installation"], cities: ["paris"] },
+  { name: "Rosemarie Trockel", key: "Trockel", born: 1952, died: null, nationality: "german", movements: ["contemporary"], media: ["sculpture", "installation"], cities: ["cologne"] },
+  { name: "Sheila Hicks", key: "Hicks", born: 1934, died: null, nationality: "american", movements: ["contemporary"], media: ["sculpture"], cities: ["paris"] },
+  { name: "Betye Saar", key: "Saar", born: 1926, died: null, nationality: "american", movements: ["contemporary"], media: ["sculpture", "installation"], cities: ["losangeles"] },
+  { name: "Faith Ringgold", key: "Ringgold", born: 1930, died: 2024, nationality: "american", movements: ["contemporary"], media: ["painting"], cities: ["newyork"] },
+  { name: "Kara Walker", key: "Walker", born: 1969, died: null, nationality: "american", movements: ["contemporary"], media: ["drawing", "installation"], cities: ["newyork"] },
+  { name: "Njideka Akunyili Crosby", key: "Akunyili Crosby", born: 1983, died: null, nationality: "nigerian", movements: ["contemporary"], media: ["painting"], cities: ["losangeles"] },
+  { name: "Zanele Muholi", key: "Muholi", born: 1972, died: null, nationality: "south-african", movements: ["contemporary"], media: ["photography"], cities: [] },
+  { name: "Cao Fei", key: "Cao Fei", born: 1978, died: null, nationality: "chinese", movements: ["contemporary"], media: ["installation"], cities: ["beijing"] },
+  { name: "Bharti Kher", key: "Kher", born: 1969, died: null, nationality: "indian", movements: ["contemporary"], media: ["sculpture"], cities: [] },
 ];
 
 const MOVEMENT_LABELS = {
@@ -611,6 +643,21 @@ const CATEGORY_POOL = {
     { type: "firstLetter", letter: "V", label: "Commence par la lettre 'V'" },
     { type: "firstLetter", letter: "F", label: "Commence par la lettre 'F'" },
   ],
+  firstNameLetter: [
+    { type: "firstNameLetter", letter: "P", label: "Prénom commence par 'P'" },
+    { type: "firstNameLetter", letter: "J", label: "Prénom commence par 'J'" },
+    { type: "firstNameLetter", letter: "H", label: "Prénom commence par 'H'" },
+    { type: "firstNameLetter", letter: "A", label: "Prénom commence par 'A'" },
+    { type: "firstNameLetter", letter: "M", label: "Prénom commence par 'M'" },
+    { type: "firstNameLetter", letter: "F", label: "Prénom commence par 'F'" },
+    { type: "firstNameLetter", letter: "G", label: "Prénom commence par 'G'" },
+    { type: "firstNameLetter", letter: "R", label: "Prénom commence par 'R'" },
+    { type: "firstNameLetter", letter: "L", label: "Prénom commence par 'L'" },
+    { type: "firstNameLetter", letter: "S", label: "Prénom commence par 'S'" },
+    { type: "firstNameLetter", letter: "C", label: "Prénom commence par 'C'" },
+    { type: "firstNameLetter", letter: "E", label: "Prénom commence par 'E'" },
+    { type: "firstNameLetter", letter: "D", label: "Prénom commence par 'D'" },
+  ],
   containsLetter: [
     { type: "containsLetter", letter: "O", label: "Contient 'O' dans le nom" },
     { type: "containsLetter", letter: "A", label: "Contient 'A' dans le nom" },
@@ -642,6 +689,12 @@ const GRID_TEMPLATES = [
   { cols: ["containsLetter", "nationality", "city"], rows: ["firstLetter", "movement", "medium"] },
   { cols: ["century", "movement", "firstLetter"], rows: ["city", "containsLetter", "nationality"] },
   { cols: ["city", "containsLetter", "medium"], rows: ["movement", "firstLetter", "nationality"] },
+  { cols: ["movement", "firstNameLetter", "city"], rows: ["nationality", "containsLetter", "medium"] },
+  { cols: ["firstNameLetter", "nationality", "containsLetter"], rows: ["movement", "city", "medium"] },
+  { cols: ["city", "movement", "firstNameLetter"], rows: ["containsLetter", "nationality", "century"] },
+  { cols: ["nationality", "containsLetter", "medium"], rows: ["firstNameLetter", "movement", "city"] },
+  { cols: ["movement", "city", "containsLetter"], rows: ["firstNameLetter", "nationality", "medium"] },
+  { cols: ["firstNameLetter", "movement", "medium"], rows: ["city", "containsLetter", "nationality"] },
 ];
 
 function _matchCat(cat, artist) {
@@ -649,6 +702,10 @@ function _matchCat(cat, artist) {
   switch (cat.type) {
     case "containsLetter": return key.includes(cat.letter.toLowerCase());
     case "firstLetter": return key.startsWith(cat.letter.toLowerCase());
+    case "firstNameLetter": {
+      const fn = artist.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return fn.startsWith(cat.letter.toLowerCase());
+    }
     case "movement": return artist.movements.includes(cat.id);
     case "nationality": return artist.nationality === cat.id;
     case "medium": return artist.media.includes(cat.id);
@@ -683,7 +740,10 @@ const WOMEN_ARTISTS = new Set([
   "Laurencin","Sonia Delaunay","Lempicka","Tanning","Oppenheim","Hepworth",
   "Mitchell","Riley","Hesse","Chicago","Holzer","Dumas","Kiki Smith",
   "Whiteread","Neshat","Saville","Mutu","Sherald","Himid","Brown","Mehretu",
-  "Mendieta",
+  "Mendieta","Chéron","Peeters","Ruysch","Élaine de Kooning","Neel",
+  "Hartigan","Thomas","Mailou Jones","Fini","Maar","Miller","Cahun","Toyen",
+  "Richier","Clark","Pape","Abakanowicz","Rist","Messager","Calle","Trockel",
+  "Hicks","Saar","Ringgold","Walker","Akunyili Crosby","Muholi","Cao Fei","Kher",
 ]);
 
 function _validateGrid(cols, rows) {

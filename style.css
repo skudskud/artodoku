@@ -215,6 +215,21 @@ body {
   font-weight: 500;
 }
 
+/* ── Possible count badge ── */
+.possible-count {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-light);
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 5;
+}
+
 /* ── Autocomplete ── */
 .autocomplete-input {
   width: 100%;

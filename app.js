@@ -20,6 +20,10 @@ function matchCategory(cat, artist) {
       return key.includes(cat.letter.toLowerCase());
     case "firstLetter":
       return key.startsWith(cat.letter.toLowerCase());
+    case "firstNameLetter": {
+      const fn = artist.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return fn.startsWith(cat.letter.toLowerCase());
+    }
     case "lastLetter":
       return key.endsWith(cat.letter.toLowerCase());
     case "movement":
@@ -146,17 +150,26 @@ function activateCell(row, col, cell) {
   cell.classList.add('active');
   highlightedIndex = -1;
 
+  const rowCat = currentGrid.rows[row];
+  const colCat = currentGrid.cols[col];
+  const possibleCount = getSolutions(rowCat, colCat).filter(a => !usedArtists.has(a.key)).length;
+
   const input = document.createElement('input');
   input.type = 'text';
   input.className = 'autocomplete-input';
   input.placeholder = 'Artiste…';
   input.autocomplete = 'off';
 
+  const badge = document.createElement('span');
+  badge.className = 'possible-count';
+  badge.textContent = possibleCount + ' choix';
+
   const dropdown = document.createElement('div');
   dropdown.className = 'autocomplete-dropdown';
   dropdown.style.display = 'none';
 
   cell.innerHTML = '';
+  cell.appendChild(badge);
   cell.appendChild(input);
   cell.appendChild(dropdown);
 
