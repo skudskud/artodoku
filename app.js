@@ -72,23 +72,14 @@ function init() {
   const today = todayStr();
 
   if (requestedDate && requestedDate !== today) {
-    currentGrid = GRIDS.find(g => g.date === requestedDate);
-    if (!currentGrid) {
-      document.querySelector('.main').innerHTML = `
-        <div class="end-banner" style="margin-top:40px">
-          <h3>Grille introuvable</h3>
-          <p>Aucune grille disponible pour le ${formatDisplayDate(requestedDate)}.</p>
-          <p style="margin-top:12px"><a href="archives.html" style="color:var(--text);font-weight:600">← Retour aux archives</a></p>
-        </div>`;
-      return;
-    }
+    currentGrid = generateGrid(requestedDate);
     document.querySelector('.grid-title').textContent = 'archive';
     const badge = document.createElement('span');
     badge.className = 'archive-badge';
     badge.textContent = `${currentGrid.difficulty}/5 · ${currentGrid.difficultyLabel}`;
     document.querySelector('.grid-title').appendChild(badge);
   } else {
-    currentGrid = GRIDS.find(g => g.date === today) || GRIDS[0];
+    currentGrid = generateGrid(today);
   }
 
   document.getElementById('grid-date').textContent = formatDisplayDate(currentGrid.date);

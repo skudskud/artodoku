@@ -301,3 +301,188 @@ const GRIDS = [
     ],
   },
 ];
+
+// ══════════════════════════════════════════════════
+// DETERMINISTIC GRID GENERATOR
+// Same date → same grid, always. No cron needed.
+// ══════════════════════════════════════════════════
+
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function hashDate(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return h;
+}
+
+const CATEGORY_POOL = {
+  movement: [
+    { type: "movement", id: "impressionism", label: "Impressionnisme" },
+    { type: "movement", id: "cubism", label: "Cubisme" },
+    { type: "movement", id: "surrealism", label: "Surréalisme" },
+    { type: "movement", id: "baroque", label: "Baroque" },
+    { type: "movement", id: "renaissance", label: "Renaissance" },
+    { type: "movement", id: "romanticism", label: "Romantisme" },
+    { type: "movement", id: "realism", label: "Réalisme" },
+    { type: "movement", id: "fauvism", label: "Fauvisme" },
+    { type: "movement", id: "expressionism", label: "Expressionnisme" },
+    { type: "movement", id: "post-impressionism", label: "Post-impressionnisme" },
+    { type: "movement", id: "pop-art", label: "Pop Art" },
+    { type: "movement", id: "abstract-expressionism", label: "Expr. abstrait" },
+    { type: "movement", id: "symbolism", label: "Symbolisme" },
+    { type: "movement", id: "neoclassicism", label: "Néoclassicisme" },
+  ],
+  nationality: [
+    { type: "nationality", id: "french", label: "Français(e)" },
+    { type: "nationality", id: "spanish", label: "Espagnol(e)" },
+    { type: "nationality", id: "italian", label: "Italien(ne)" },
+    { type: "nationality", id: "dutch", label: "Néerlandais(e)" },
+    { type: "nationality", id: "american", label: "Américain(e)" },
+    { type: "nationality", id: "british", label: "Britannique" },
+    { type: "nationality", id: "german", label: "Allemand(e)" },
+  ],
+  city: [
+    { type: "city", id: "paris", label: "A travaillé à Paris" },
+    { type: "city", id: "newyork", label: "A travaillé à New York" },
+    { type: "city", id: "rome", label: "A travaillé à Rome" },
+    { type: "city", id: "london", label: "A travaillé à Londres" },
+    { type: "city", id: "florence", label: "A travaillé à Florence" },
+  ],
+  firstLetter: [
+    { type: "firstLetter", letter: "M", label: "Commence par la lettre 'M'" },
+    { type: "firstLetter", letter: "D", label: "Commence par la lettre 'D'" },
+    { type: "firstLetter", letter: "C", label: "Commence par la lettre 'C'" },
+    { type: "firstLetter", letter: "R", label: "Commence par la lettre 'R'" },
+    { type: "firstLetter", letter: "G", label: "Commence par la lettre 'G'" },
+    { type: "firstLetter", letter: "B", label: "Commence par la lettre 'B'" },
+    { type: "firstLetter", letter: "P", label: "Commence par la lettre 'P'" },
+    { type: "firstLetter", letter: "K", label: "Commence par la lettre 'K'" },
+    { type: "firstLetter", letter: "S", label: "Commence par la lettre 'S'" },
+    { type: "firstLetter", letter: "T", label: "Commence par la lettre 'T'" },
+    { type: "firstLetter", letter: "V", label: "Commence par la lettre 'V'" },
+    { type: "firstLetter", letter: "F", label: "Commence par la lettre 'F'" },
+  ],
+  containsLetter: [
+    { type: "containsLetter", letter: "O", label: "Contient 'O' dans le nom" },
+    { type: "containsLetter", letter: "A", label: "Contient 'A' dans le nom" },
+    { type: "containsLetter", letter: "E", label: "Contient 'E' dans le nom" },
+    { type: "containsLetter", letter: "I", label: "Contient 'I' dans le nom" },
+    { type: "containsLetter", letter: "R", label: "Contient 'R' dans le nom" },
+    { type: "containsLetter", letter: "N", label: "Contient 'N' dans le nom" },
+    { type: "containsLetter", letter: "L", label: "Contient 'L' dans le nom" },
+  ],
+  medium: [
+    { type: "medium", id: "sculpture", label: "Aussi sculpteur" },
+  ],
+  century: [
+    { type: "century", century: 20, label: "Actif au XXe siècle" },
+    { type: "century", century: 19, label: "Actif au XIXe siècle" },
+  ],
+};
+
+const GRID_TEMPLATES = [
+  { cols: ["movement", "nationality", "containsLetter"], rows: ["city", "firstLetter", "medium"] },
+  { cols: ["movement", "firstLetter", "city"], rows: ["nationality", "containsLetter", "medium"] },
+  { cols: ["nationality", "containsLetter", "century"], rows: ["city", "firstLetter", "medium"] },
+  { cols: ["city", "movement", "containsLetter"], rows: ["nationality", "firstLetter", "century"] },
+  { cols: ["containsLetter", "movement", "city"], rows: ["nationality", "firstLetter", "medium"] },
+  { cols: ["firstLetter", "nationality", "century"], rows: ["movement", "containsLetter", "city"] },
+  { cols: ["movement", "containsLetter", "medium"], rows: ["nationality", "city", "firstLetter"] },
+  { cols: ["nationality", "city", "firstLetter"], rows: ["movement", "containsLetter", "century"] },
+  { cols: ["movement", "city", "firstLetter"], rows: ["containsLetter", "nationality", "medium"] },
+  { cols: ["containsLetter", "nationality", "city"], rows: ["firstLetter", "movement", "medium"] },
+  { cols: ["century", "movement", "firstLetter"], rows: ["city", "containsLetter", "nationality"] },
+  { cols: ["city", "containsLetter", "medium"], rows: ["movement", "firstLetter", "nationality"] },
+];
+
+function _matchCat(cat, artist) {
+  const key = artist.key.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  switch (cat.type) {
+    case "containsLetter": return key.includes(cat.letter.toLowerCase());
+    case "firstLetter": return key.startsWith(cat.letter.toLowerCase());
+    case "movement": return artist.movements.includes(cat.id);
+    case "nationality": return artist.nationality === cat.id;
+    case "medium": return artist.media.includes(cat.id);
+    case "city": return artist.cities.includes(cat.id);
+    case "century": {
+      const s = (cat.century - 1) * 100, e = cat.century * 100;
+      return artist.born < e && (artist.died || 2026) > s;
+    }
+    default: return false;
+  }
+}
+
+function _pick(arr, rng) {
+  return arr[Math.floor(rng() * arr.length)];
+}
+
+function _shuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function _validateGrid(cols, rows) {
+  let minSolutions = Infinity;
+  for (const row of rows) {
+    for (const col of cols) {
+      const count = ARTISTS.filter(a => _matchCat(row, a) && _matchCat(col, a)).length;
+      if (count === 0) return { valid: false, min: 0 };
+      minSolutions = Math.min(minSolutions, count);
+    }
+  }
+  return { valid: true, min: minSolutions };
+}
+
+function generateGrid(dateStr) {
+  const hardcoded = GRIDS.find(g => g.date === dateStr);
+  if (hardcoded) return hardcoded;
+
+  for (let attempt = 0; attempt < 200; attempt++) {
+    const rng = mulberry32(hashDate(dateStr) + attempt * 7919);
+
+    const template = _pick(GRID_TEMPLATES, rng);
+
+    const cols = template.cols.map(group => {
+      const pool = CATEGORY_POOL[group];
+      return pool ? _pick(_shuffle(pool, rng), rng) : null;
+    }).filter(Boolean);
+
+    const rows = template.rows.map(group => {
+      const pool = CATEGORY_POOL[group];
+      return pool ? _pick(_shuffle(pool, rng), rng) : null;
+    }).filter(Boolean);
+
+    if (cols.length !== 3 || rows.length !== 3) continue;
+
+    const hasDupe = new Set([...cols, ...rows].map(c => JSON.stringify(c))).size < 6;
+    if (hasDupe) continue;
+
+    const { valid, min } = _validateGrid(cols, rows);
+    if (!valid) continue;
+
+    let difficulty, difficultyLabel;
+    if (min >= 6) { difficulty = 1; difficultyLabel = "Très facile"; }
+    else if (min >= 4) { difficulty = 2; difficultyLabel = "Facile"; }
+    else if (min >= 2) { difficulty = 3; difficultyLabel = "Moyen"; }
+    else if (min >= 1) { difficulty = 4; difficultyLabel = "Difficile"; }
+    else { difficulty = 5; difficultyLabel = "Très difficile"; }
+
+    return { date: dateStr, difficulty, difficultyLabel, cols, rows, generated: true };
+  }
+
+  return GRIDS[0];
+}

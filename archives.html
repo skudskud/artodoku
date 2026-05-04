@@ -107,43 +107,46 @@
 
   <script src="data.js"></script>
   <script>
+    const ARCHIVE_DAYS = 30;
+
     function formatDisplayDate(dateStr) {
       const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
       const [y, m, d] = dateStr.split('-');
       return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
     }
 
-    function todayStr() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    function dateStr(date) {
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
     }
 
     function renderArchives() {
       const list = document.getElementById('archive-list');
-      const today = todayStr();
-      const pastGrids = GRIDS.filter(g => g.date !== today).sort((a, b) => b.date.localeCompare(a.date));
+      const now = new Date();
+      const todayS = dateStr(now);
 
-      pastGrids.forEach(grid => {
+      for (let i = 1; i <= ARCHIVE_DAYS; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const ds = dateStr(d);
+
+        const grid = generateGrid(ds);
+
         const card = document.createElement('div');
         card.className = 'archive-card';
 
         let dots = '';
-        for (let i = 1; i <= 5; i++) {
-          dots += `<span class="diff-dot${i <= grid.difficulty ? ' active' : ''}"></span>`;
+        for (let j = 1; j <= 5; j++) {
+          dots += `<span class="diff-dot${j <= grid.difficulty ? ' active' : ''}"></span>`;
         }
 
         card.innerHTML = `
           <div class="archive-card-info">
-            <h3>${formatDisplayDate(grid.date)}</h3>
+            <h3>${formatDisplayDate(ds)}</h3>
             <div class="difficulty">${dots} ${grid.difficulty}/5 · ${grid.difficultyLabel}</div>
           </div>
-          <a href="index.html?date=${grid.date}" class="archive-play-btn">Jouer cette grille</a>
+          <a href="index.html?date=${ds}" class="archive-play-btn">Jouer cette grille</a>
         `;
         list.appendChild(card);
-      });
-
-      if (pastGrids.length === 0) {
-        list.innerHTML = '<p style="color:var(--text-light);font-size:14px;">Aucune archive disponible pour le moment.</p>';
       }
     }
 
