@@ -42,6 +42,40 @@
       © 2026, artodoku
     </footer>
   </div>
+
+  <!-- How-to-play modal -->
+  <div class="modal-overlay" id="how-to-play-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close-x">&times;</button>
+      <h2 class="modal-title">Comment jouer à artodoku</h2>
+      <ul class="modal-rules">
+        <li>Le but du jeu est de remplir les 9 cases avec des artistes qui correspondent à la fois au critère de la ligne et à celui de la colonne.</li>
+        <li>Vous n'avez droit qu'à <strong>3 erreurs</strong> par partie.</li>
+        <li>Une fois un artiste placé dans la grille, il ne peut plus être modifié ni réutilisé ailleurs.</li>
+        <li>Si une catégorie n'est pas claire, cliquez sur l'icône <strong>?</strong> pour afficher son explication.</li>
+        <li>À la fin de la partie, cliquez sur les cases pour consulter les détails des artistes.</li>
+        <li>Une nouvelle grille est proposée chaque jour.</li>
+      </ul>
+      <div class="modal-footer">
+        <label class="modal-checkbox-label">
+          <input type="checkbox" id="modal-dismiss-checkbox">
+          Ne plus afficher la prochaine fois
+        </label>
+        <button class="modal-play-btn" id="modal-play-btn">Jouer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category detail modal -->
+  <div class="modal-overlay" id="cat-detail-modal" style="display:none;">
+    <div class="modal-card modal-card-sm">
+      <button class="modal-close" id="cat-detail-close">&times;</button>
+      <p class="cat-detail-type">CATÉGORIE</p>
+      <h3 class="cat-detail-title" id="cat-detail-title"></h3>
+      <p class="cat-detail-desc" id="cat-detail-desc"></p>
+    </div>
+  </div>
+
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

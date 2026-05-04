@@ -69,6 +69,69 @@ function todayStr() {
   return `${y}-${m}-${day}`;
 }
 
+// ── Category descriptions for "?" popups ──
+function getCategoryDescription(cat) {
+  switch (cat.type) {
+    case "movement":
+      return `Désigne les artistes rattachés au mouvement « ${cat.label} ». Un artiste peut appartenir à plusieurs mouvements.`;
+    case "nationality":
+      return `Désigne les artistes de nationalité ${cat.label.toLowerCase()}.`;
+    case "city":
+      return `Désigne les artistes ayant vécu ou travaillé à ${CITY_LABELS[cat.id] || cat.id}.`;
+    case "firstLetter":
+      return `Désigne les artistes dont le nom de famille commence par la lettre « ${cat.letter} » (sans les accents).`;
+    case "firstNameLetter":
+      return `Désigne les artistes dont le prénom commence par la lettre « ${cat.letter} » (sans les accents).`;
+    case "containsLetter":
+      return `Désigne les artistes dont le nom de famille contient la lettre « ${cat.letter} » (sans les accents).`;
+    case "medium":
+      return `Désigne les artistes qui ont pratiqué : ${MEDIUM_LABELS[cat.id] || cat.id}.`;
+    case "century":
+      return `Désigne les artistes actifs au cours du ${cat.label.replace('Actif au ', '')} (entre ${(cat.century - 1) * 100} et ${cat.century * 100}).`;
+    default:
+      return cat.label;
+  }
+}
+
+function getArtistSummary(artist) {
+  const nat = NATIONALITY_LABELS[artist.nationality] || artist.nationality;
+  const dates = artist.died ? `${artist.born}–${artist.died}` : `${artist.born}–…`;
+  const mvts = artist.movements.map(m => MOVEMENT_LABELS[m] || m).join(', ');
+  return `${artist.name}<br>${nat} · ${dates}<br>${mvts}`;
+}
+
+// ── How-to-play modal ──
+function showHowToPlay() {
+  const modal = document.getElementById('how-to-play-modal');
+  if (localStorage.getItem('artodoku-hide-howto') === '1') {
+    modal.classList.add('hidden');
+    return;
+  }
+  modal.classList.remove('hidden');
+
+  const closeModal = () => {
+    if (document.getElementById('modal-dismiss-checkbox').checked) {
+      localStorage.setItem('artodoku-hide-howto', '1');
+    }
+    modal.classList.add('hidden');
+  };
+
+  document.getElementById('modal-play-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-close-x').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+}
+
+function showCategoryDetail(cat) {
+  const modal = document.getElementById('cat-detail-modal');
+  document.getElementById('cat-detail-title').textContent = cat.label;
+  document.getElementById('cat-detail-desc').textContent = getCategoryDescription(cat);
+  modal.style.display = 'flex';
+
+  const close = () => { modal.style.display = 'none'; };
+  document.getElementById('cat-detail-close').onclick = close;
+  modal.onclick = (e) => { if (e.target === modal) close(); };
+}
+
 // ── Init ──
 function init() {
   const params = new URLSearchParams(window.location.search);
@@ -90,6 +153,7 @@ function init() {
   renderGrid();
   renderErrors();
   updateScore();
+  showHowToPlay();
 
   document.getElementById('abandon-btn').addEventListener('click', onAbandon);
 
@@ -109,13 +173,21 @@ function renderGrid() {
 
   currentGrid.cols.forEach(col => {
     const header = el('div', 'col-header');
-    header.innerHTML = `<span class="header-label">${col.label}</span>`;
+    header.innerHTML = `<span class="header-help">?</span><span class="header-label">${col.label}</span>`;
+    header.querySelector('.header-help').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showCategoryDetail(col);
+    });
     grid.appendChild(header);
   });
 
   currentGrid.rows.forEach((row, ri) => {
     const rh = el('div', 'row-header');
-    rh.innerHTML = `<span class="header-label">${row.label}</span>`;
+    rh.innerHTML = `<span class="header-help">?</span><span class="header-label">${row.label}</span>`;
+    rh.querySelector('.header-help').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showCategoryDetail(row);
+    });
     grid.appendChild(rh);
 
     currentGrid.cols.forEach((col, ci) => {
@@ -297,11 +369,7 @@ function selectArtist(artist, row, col) {
     const cell = activeCell.element;
     cell.classList.remove('active');
     cell.classList.add('solved');
-    cell.innerHTML = `
-      <div>
-        <div class="artist-name">${artist.key}</div>
-      </div>
-    `;
+    renderSolvedCell(cell, artist, false);
     activeCell = null;
     highlightedIndex = -1;
     updateScore();
@@ -324,6 +392,19 @@ function selectArtist(artist, row, col) {
       endGame(false);
     }
   }
+}
+
+function renderSolvedCell(cell, artist, isRevealed) {
+  const nat = NATIONALITY_LABELS[artist.nationality] || artist.nationality;
+  const dates = artist.died ? `${artist.born}–${artist.died}` : `${artist.born}–`;
+  const nameColor = isRevealed ? 'color: var(--text-light);' : '';
+  cell.innerHTML = `
+    <div>
+      <div class="artist-name" style="${nameColor}">${artist.key}</div>
+      <div class="artist-info">${nat} · ${dates}</div>
+    </div>
+    <div class="artist-tooltip">${getArtistSummary(artist)}</div>
+  `;
 }
 
 // ── Score & Errors ──
@@ -376,11 +457,7 @@ function revealSolutions() {
         if (cell && solutions.length > 0) {
           revealedArtists.add(solutions[0].key);
           cell.classList.add('game-over');
-          cell.innerHTML = `
-            <div>
-              <div class="artist-name" style="color: var(--text-light);">${solutions[0].key}</div>
-            </div>
-          `;
+          renderSolvedCell(cell, solutions[0], true);
         }
       }
     });
